@@ -1,0 +1,1011 @@
+CREATE TABLE Person (
+    PE_ID INT NOT NULL,
+    PE_PreferredName VARCHAR(50) NOT NULL,
+    PE_LanguageSpoken VARCHAR(50) NOT NULL,
+    PE_Nationality VARCHAR(50) NOT NULL, 
+    PE_Allergies VARCHAR(50) NULL,
+    PE_CommunicationPreference VARCHAR(50) NULL,  
+    PE_ICNumber VARCHAR(20) UNIQUE,  
+    PE_Race VARCHAR(50) NULL,
+    PE_EmergencyContact VARCHAR(15) NULL,  
+    PE_DiscountEligibility VARCHAR(50) NULL,
+    CONSTRAINT pk_person PRIMARY KEY (PE_ID, PE_PREFERREDNAME)
+);
+
+
+CREATE TABLE Customer (
+    C_ID INT NOT NULL,
+    C_Name VARCHAR(50) NOT NULL,
+    C_PhoneNumber VARCHAR(15) UNIQUE,
+    C_DOB DATE NOT NULL,
+    C_Gender VARCHAR(10) NOT NULL CHECK (C_Gender IN ('Male', 'Female', 'Other')),
+    C_Address VARCHAR(50) NOT NULL,
+    C_MembershipStatus VARCHAR(20) DEFAULT 'Regular' NOT NULL CHECK (C_MembershipStatus IN ('Regular', 'Silver', 'Gold', 'Platinum')),
+    C_PointsBalance NUMBER(10,2) DEFAULT 0 CHECK (C_PointsBalance >= 0) NOT NULL,
+    C_RegistrationDate DATE NOT NULL,
+    C_Preference VARCHAR(50) NULL, 
+    PE_ID INT, 
+    PE_PREFERREDNAME VARCHAR(50), 
+    CONSTRAINT fk_peid FOREIGN KEY (PE_ID, PE_PREFERREDNAME) REFERENCES Person(PE_ID, PE_PREFERREDNAME),
+    CONSTRAINT pk_customer PRIMARY KEY (C_ID, C_NAME)
+);
+
+
+CREATE TABLE Employee (
+    E_ID INT NOT NULL,
+    E_FullName VARCHAR(50) NOT NULL,
+    E_Role VARCHAR(50) NOT NULL,
+    E_PhoneNumber VARCHAR(15) UNIQUE,
+    E_Email VARCHAR(50) UNIQUE,
+    E_Address VARCHAR(50) NOT NULL,
+    E_Salary DECIMAL(10,2) NOT NULL,
+    E_HireDate DATE NOT NULL,
+    E_Shift VARCHAR(50) NOT NULL,
+    E_Status VARCHAR(50) DEFAULT 'Active' CHECK (E_Status IN ('Active', 'Inactive')),
+    PE_ID INT,
+    PE_PREFERREDNAME VARCHAR(50),  
+    CONSTRAINT fk_employee_peid FOREIGN KEY (PE_ID, PE_PREFERREDNAME) REFERENCES Person(PE_ID, PE_PREFERREDNAME) ON DELETE CASCADE,
+    CONSTRAINT pk_employee PRIMARY KEY (E_ID, E_FULLNAME)
+);
+
+
+
+
+CREATE TABLE Barista (
+    BA_ID INT NOT NULl,
+    BA_Nickname VARCHAR(50) NOT NULL UNIQUE,
+    BA_BeverageExpertise VARCHAR(50) CHECK (BA_BeverageExpertise IN ('Coffee', 'Tea', 'Smoothies', 'Mixed Beverages')),
+    BA_CertificationLevel VARCHAR(50) CHECK (BA_CertificationLevel IN ('Beginner', 'Intermediate', 'Advanced', 'Expert')),
+    BA_TrainingComplete VARCHAR(10) DEFAULT 'No' CHECK (BA_TrainingComplete IN ('Yes', 'No')),
+    BA_EducationLevel VARCHAR(50) NULL,
+    BA_CustomerFeedbackScore INT CHECK (BA_CustomerFeedbackScore BETWEEN 1 AND 5),
+    BA_SpeedOfService INT NULL CHECK (BA_SpeedOfService > 0),
+    BA_ShiftPreference VARCHAR(50) CHECK (BA_ShiftPreference IN ('Morning', 'Afternoon', 'Evening', 'Flexible')),
+    BA_InnovationContribution VARCHAR(50) NULL,
+    E_ID INT,
+    E_FULLNAME VARCHAR(50),  
+    CONSTRAINT fk_eid FOREIGN KEY (E_ID, E_FULLNAME) REFERENCES Employee(E_ID, E_FULLNAME) ON DELETE CASCADE,
+    CONSTRAINT pk_barista PRIMARY KEY (BA_ID, BA_NICKNAME)
+);
+
+
+CREATE TABLE Manager (
+    MA_ID INT NOT NULL,
+    MA_DisplayName VARCHAR(50) NOT NULL UNIQUE,
+    MA_ManagementLevel VARCHAR(50) NOT NULL,
+    MA_Department VARCHAR(50) NOT NULL,
+    MA_TeamSize INT NULL CHECK (MA_TeamSize >= 0),
+    MA_AuthorityLevel VARCHAR(50) NULL,
+    MA_StrategicGoals VARCHAR(50) NULL,
+    MA_PerformanceRating INT NULL CHECK (MA_PerformanceRating BETWEEN 0 AND 5),
+    MA_BonusEligibility VARCHAR(10) DEFAULT 'No' CHECK (MA_BonusEligibility IN ('Yes', 'No')),
+    MA_BudgetResponsibility NUMBER(10,2) NULL CHECK (MA_BudgetResponsibility >= 0),
+    E_ID INT,
+    E_FULLNAME VARCHAR(50),
+    CONSTRAINT fk_e_id FOREIGN KEY (E_ID, E_FULLNAME) REFERENCES Employee(E_ID, E_FULLNAME) ON DELETE CASCADE,
+    CONSTRAINT pk_manager PRIMARY KEY (MA_ID, MA_DISPLAYNAME)
+);
+
+CREATE TABLE LoyaltyProgram (
+LP_ID INT NOT NULL,
+LP_NAME VARCHAR(50),
+LP_Tier VARCHAR(50) CHECK (LP_Tier IN ('Bronze', 'Silver', 'Gold', 'Platinum')),
+LP_Points INT DEFAULT 0 CHECK (LP_Points >= 0),
+LP_RedeemableRewards VARCHAR(50),
+LP_Rank VARCHAR(50),
+LP_ExclusiveBenefits VARCHAR(50),
+LP_Engagement VARCHAR(50),
+LP_FreeService VARCHAR(50),
+LP_GrowthMode VARCHAR(50),
+LP_ExpiryDate DATE NOT NULL,
+CONSTRAINT pk_loyaltyprogram PRIMARY KEY (LP_ID, LP_NAME)
+);
+
+CREATE TABLE TrainingPrograms (
+    TP_ID INT NOT NULL,
+    TP_Name VARCHAR(50) NOT NULL,
+    TP_StartDate DATE NOT NULL,
+    TP_EndDate DATE NOT NULL,
+    TP_TrainerName VARCHAR(50) NOT NULL,
+    TP_Status VARCHAR(15) NOT NULL CHECK (TP_Status IN ('Planned', 'Ongoing', 'Completed', 'Cancelled')),
+    TP_TrainRank NUMBER(2,1) NOT NULL CHECK (TP_TrainRank BETWEEN 0 AND 10),
+    TP_TrainContent VARCHAR(50) NULL,
+    TP_TrainMethod VARCHAR(50) NOT NULL CHECK (TP_TrainMethod IN ('Online', 'Offline', 'Hybrid')),
+    TP_TrainAppraisal NUMBER(3,1) NOT NULL CHECK (TP_TrainAppraisal BETWEEN 0 AND 100),
+    CONSTRAINT pk_trainingprograms PRIMARY KEY (TP_ID, TP_NAME)
+);
+
+
+CREATE TABLE EmployeePerformance (
+    EP_ID INT NOT NULL,
+    EP_Date DATE NOT NULL,
+    EP_Rating NUMBER(2,1) NOT NULL CHECK (EP_Rating BETWEEN 0 AND 10),
+    EP_Reviewer VARCHAR(50) NOT NULL,
+    EP_Comments VARCHAR(50) NULL,
+    EP_CustomerFeedback VARCHAR(50) NULL,
+    EP_AreasForImprovement VARCHAR(50) NULL,
+    EP_PromotionEligibility VARCHAR(10) NOT NULL CHECK (EP_PromotionEligibility IN ('Yes', 'No')),
+    EP_ServiceQuality INT NOT NULL CHECK (EP_ServiceQuality BETWEEN 0 AND 100),
+    EP_PersonalGoals VARCHAR(50) NULL,
+    E_ID INT,
+    E_FULLNAME VARCHAR(50),  
+    TP_ID INT,
+    TP_NAME VARCHAR(50), 
+    CONSTRAINT fk_ep_eid FOREIGN KEY (E_ID, E_FULLNAME) 
+        REFERENCES Employee(E_ID, E_FULLNAME) ON DELETE CASCADE,
+    CONSTRAINT fk_ep_tpid FOREIGN KEY (TP_ID, TP_NAME) 
+        REFERENCES TrainingPrograms(TP_ID, TP_NAME) ON DELETE CASCADE,
+    CONSTRAINT pk_employeeperformance PRIMARY KEY (EP_ID, EP_Rating)
+);
+
+
+CREATE TABLE Branch (
+    B_ID INT NOT NULL,
+    B_Name VARCHAR(50) NOT NULL,
+    B_Address VARCHAR(50) NOT NULL,
+    B_City VARCHAR(50) NOT NULL,
+    B_State VARCHAR(50) NOT NULL,
+    B_Zipcode INT NOT NULL UNIQUE,
+    B_PhoneNumber VARCHAR(20) NOT NULL UNIQUE,
+    B_OperationHours VARCHAR(50) NOT NULL,
+    B_OpeningDate DATE NOT NULL,
+    B_Manager VARCHAR(50) NOT NULL,
+    CONSTRAINT pk_branch PRIMARY KEY (B_ID, B_NAME)
+);
+
+CREATE TABLE Supplier (
+    S_ID INT NOT NULL,
+    S_Name VARCHAR(50) NOT NULL,
+    S_Address VARCHAR(50) NOT NULL,
+    S_PhoneNumber VARCHAR(20) NOT NULL UNIQUE,
+    S_Email VARCHAR(50) NOT NULL UNIQUE,
+    S_SupplyType VARCHAR(50) NOT NULL CHECK (S_SupplyType IN ('Food', 'Beverage', 'Equipment', 'Others')),
+    S_ContactPerson VARCHAR(50) NOT NULL,
+    S_Rating NUMBER(2,1) NOT NULL CHECK (S_Rating BETWEEN 0 AND 10),
+    S_ContractStartDate DATE NOT NULL,
+    S_ContractEndDate DATE NOT NULL,
+    CONSTRAINT pk_supplier PRIMARY KEY (S_ID, S_NAME)
+);
+
+CREATE TABLE Inventory (
+    I_ID INT NOT NULL,
+    I_Name VARCHAR(50) NOT NULL,
+    I_Quantity INT NOT NULL CHECK (I_Quantity >= 0),
+    I_UnitPrice NUMBER(10,2) NOT NULL CHECK (I_UnitPrice >= 0),
+    I_RestockLevel INT CHECK (I_RestockLevel >= 0) NOT NULL,
+    I_RestockDate DATE NOT NULL,
+    I_ExpiryDate DATE NOT NULL,
+    I_StorageLocation VARCHAR(50) NULL,
+    I_Notes VARCHAR(50) NULL,
+    B_ID INT,
+    B_NAME VARCHAR(50),
+    CONSTRAINT fk_b_id FOREIGN KEY (B_ID, B_NAME) REFERENCES Branch(B_ID, B_NAME) ON DELETE CASCADE,
+    CONSTRAINT pk_inventory PRIMARY KEY (I_ID, I_NAME)
+);
+
+
+
+CREATE TABLE Assets (
+    A_ID INT NOT NULL,
+    A_Name VARCHAR(100) NOT NULL,
+    A_Type VARCHAR(100) NOT NULL,
+    A_Brand VARCHAR(100) NOT NULL,
+    A_Model VARCHAR(50) NOT NULL,
+    A_PurchaseDate DATE NOT NULL,
+    A_WarrantyExpiry DATE NOT NULL,
+    A_Status VARCHAR(100) NULL,
+    A_Location VARCHAR(50) NULL,
+    A_DepreciationValue NUMBER(10,2) NULL,
+    S_ID INT,
+    S_NAME VARCHAR(100),
+    CONSTRAINT fk_s_id FOREIGN KEY (S_ID, S_NAME) REFERENCES Supplier(S_ID, S_NAME) ON DELETE CASCADE,
+    CONSTRAINT check_warranty CHECK (A_WarrantyExpiry > A_PurchaseDate),
+    CONSTRAINT pk_asset PRIMARY KEY (A_ID, A_NAME)
+);
+
+
+CREATE TABLE MachineMaintenance (
+    MM_ID INT NOT NULL,
+    MM_MachineType VARCHAR(50) NOT NULL,
+    MM_MachineID INT NOT NULL,
+    MM_LastMaintenanceDate DATE NOT NULL,
+    MM_NextMaintenanceDate DATE NOT NULL,
+    MM_Status VARCHAR(50) CHECK (MM_Status IN ('Operational', 'Under Maintenance', 'Out of Service')),
+    MM_TechnicianName VARCHAR(50) NULL,
+    MM_TechnicianContact VARCHAR(15) NOT NULL,
+    MM_RepairCost NUMBER(10,2) NULL,
+    MM_IssueDescription VARCHAR(100) NULL,
+    B_ID INT,
+    B_NAME VARCHAR(50),
+    S_ID INT,
+    S_NAME VARCHAR(50),
+    CONSTRAINT fk_bid FOREIGN KEY (B_ID, B_NAME) REFERENCES Branch(B_ID, B_NAME),
+    CONSTRAINT fk_sid FOREIGN KEY (S_ID, S_NAME) REFERENCES Supplier(S_ID, S_NAME),
+    CONSTRAINT pk_machinemaintenance PRIMARY KEY (MM_ID, MM_MACHINEID)
+);
+
+CREATE TABLE AppRegistration (
+AR_ID INT NOT NULL,
+AR_Username VARCHAR(50) NOT NULL UNIQUE,
+AR_Email VARCHAR(50) NOT NULL UNIQUE,
+AR_PhoneNumber VARCHAR(15) NOT NULL UNIQUE,
+AR_Address VARCHAR(50),
+AR_RegistrationDate DATE NOT NULL,
+AR_Verified VARCHAR(10) CHECK (AR_Verified IN ('Yes', 'No')),
+AR_Password VARCHAR(50) NOT NULL,
+AR_Birthday VARCHAR(20) NOT NULL UNIQUE,
+AR_DeviceID VARCHAR(50),
+AR_IP VARCHAR(45) NOT NULL,
+CONSTRAINT pk_appregistration PRIMARY KEY (AR_ID, AR_USERNAME)
+);
+
+CREATE TABLE AppLogin (
+L_ID INT NOT NULL,
+L_DeviceType VARCHAR(50) NOT NULL,
+L_LastLoginDate DATE NOT NULL,
+L_LastLoginTime DATE NOT NULL,
+L_IPAddress VARCHAR(45) NOT NULL,
+L_Status VARCHAR(10) CHECK (L_Status IN ('Active', 'Blocked', 'Pending')),
+L_Attempts INT CHECK (L_Attempts >= 0),
+L_Password VARCHAR(50) NOT NULL,
+L_EmailPhonePin VARCHAR(50),
+L_OAuth VARCHAR(50),
+CONSTRAINT pk_applogin PRIMARY KEY (L_ID, L_DEVICETYPE)
+);
+
+ 
+CREATE TABLE Menu (
+    M_ID INT NOT NULL,
+    M_Name VARCHAR(50) NOT NULL,
+    M_Description VARCHAR(100) NULL,
+    M_Category VARCHAR(50) CHECK (M_Category IN ('Food', 'Drink')) NOT NULL,
+    M_Price NUMBER(6,2) NOT NULL CHECK (M_Price >= 0),
+    M_Calories INT NOT NULL CHECK (M_Calories >= 0),
+    M_Availability VARCHAR(20) DEFAULT 'Available' CHECK (M_Availability IN ('Available', 'Unavailable')) NOT NULL,
+    M_SpecialOffer VARCHAR(50) NULL,
+    M_Type VARCHAR(50) NULL,
+    M_Allergens VARCHAR(50) NULL,
+    CONSTRAINT pk_menu PRIMARY KEY (M_ID, M_NAME)
+);
+
+
+CREATE TABLE Promotions(
+PR_ID INT NOT NULL,
+PR_Name VARCHAR(50) NOT NULL,
+PR_Description VARCHAR(100),
+PR_StartDate DATE NOT NULL,
+PR_EndDate DATE NOT NULL,
+PR_DiscountPercentage NUMBER(5,2) CHECK (PR_DiscountPercentage BETWEEN 0 AND 50),
+PR_AppliesTo VARCHAR(50),
+PR_Repertory VARCHAR(50),
+PR_AdFee NUMBER(10,2) DEFAULT 0.00 CHECK (PR_AdFee >= 0),
+PR_Influence VARCHAR(50),
+CONSTRAINT pk_promotions PRIMARY KEY (PR_ID, PR_NAME)
+);
+
+CREATE TABLE GiftCards (
+GC_ID INT NOT NULL,
+GC_Code VARCHAR(50) NOT NULL UNIQUE,
+GC_Balance NUMBER(10,2) DEFAULT 0.00 CHECK (GC_Balance >= 0),
+GC_ExpiryDate DATE NOT NULL,
+GC_Status VARCHAR(20) CHECK (GC_Status IN ('Active', 'Expired', 'Redeemed')),
+GC_Type VARCHAR(20)  CHECK (GC_Type IN ('Points', 'Cash', 'Other')),
+GC_UseWay VARCHAR(50),
+GC_Denomination NUMBER(10,2),
+GC_UseScope VARCHAR(50),
+GC_LittleRewards VARCHAR(50),
+CONSTRAINT pk_giftcard PRIMARY KEY (GC_ID, GC_CODE)
+);
+
+CREATE TABLE DrinkMenu (
+D_ItemID INT NOT NULL,
+D_Name VARCHAR(50) NOT NULL,
+D_DrinkType VARCHAR(50) CHECK (D_DrinkType IN ('Frappe', 'Latte', 'Juice', 'Non-Coffee')),
+D_Size VARCHAR(20) CHECK (D_Size IN ('Large', 'Medium', 'Small')),
+D_CaffeineContent NUMBER(5,2),
+D_Flavor VARCHAR(50),
+D_Customization VARCHAR(50),
+D_Temperature VARCHAR(50),
+D_ServingStyle VARCHAR(50),
+D_BeverageOrigin VARCHAR(50),
+D_isSignatureDrink VARCHAR(10) DEFAULT 'No' CHECK (D_isSignatureDrink IN ('Yes', 'No')),
+M_ID INT NOT NULL,
+M_NAME VARCHAR(50),
+constraint fk_dmmid foreign key (M_ID, M_NAME) REFERENCES Menu(M_ID, M_NAME),
+CONSTRAINT pk_drinkmenu PRIMARY KEY (D_ITEMID, D_NAME)
+);
+
+CREATE TABLE FoodMenu (
+F_ItemID INT NOT NULL,
+F_DishName VARCHAR(50) NOT NULL,
+F_FoodType VARCHAR(50) NOT NULL,
+F_ServingSize VARCHAR(50),
+F_PreparationTime NUMBER(5,2) NOT NULL,
+F_SpiceLevel VARCHAR(20),
+F_StorageCondition VARCHAR(50),
+F_IsVegetarian VARCHAR(20) DEFAULT 'No' CHECK (F_IsVegetarian IN ('Yes', 'No')),
+F_PackagingType VARCHAR(50),
+F_Ingredient VARCHAR(200),
+M_ID INT NOT NULL,
+M_NAME VARCHAR(50),
+constraint fk_fmmid foreign key (M_ID, M_NAME) REFERENCES Menu(M_ID, M_NAME),
+CONSTRAINT pk_foodmenu PRIMARY KEY (F_ITEMID, F_DISHNAME)
+);
+
+
+CREATE TABLE Payment (
+P_ID INT NOT NULL,
+P_Method VARCHAR(50) CHECK (P_Method IN ('Cash', 'Card', 'E-Wallet', 'Bank Transfer')) NOT NULL,
+P_Amount NUMBER(10,2) NOT NULL CHECK (P_Amount > 0),
+P_Date DATE NOT NULL,
+P_Status VARCHAR(20) CHECK (P_Status IN ('Pending', 'Completed', 'Failed', 'Refunded')),
+P_Bank VARCHAR(50),
+P_ReceiptNo VARCHAR(50) NOT NULL UNIQUE,
+P_TaxAmount NUMBER(10,2) NOT NULL,
+P_ReferenceNo VARCHAR(50) UNIQUE,
+P_Currency VARCHAR(10) CHECK (P_Currency IN ('MYR', 'USD', 'EUR', 'SGD')) NOT NULL,
+AR_ID INT,
+AR_USERNAME VARCHAR(50),
+S_ID INT,
+S_NAME VARCHAR(50),
+constraint fk_parid foreign key (AR_ID, AR_USERNAME) REFERENCES AppRegistration(AR_ID, AR_USERNAME),
+constraint fk_psid foreign key (S_ID, S_NAME) REFERENCES Supplier(S_ID, S_NAME),
+CONSTRAINT pk_payment PRIMARY KEY (P_ID, P_RECEIPTNO)
+);
+
+CREATE TABLE CashPayment (
+CP_ID INT NOT NULL,
+CP_CashDrawerNo VARCHAR(50) NOT NULL,
+CP_ChangeGiven NUMBER(10,2) DEFAULT 0 CHECK (CP_ChangeGiven >= 0),
+CP_Authentication VARCHAR(50) CHECK (CP_Authentication IN ('Verified', 'Not Verified')),
+CP_TipAmount NUMBER(10,2) DEFAULT 0,
+CP_DiscountApplied VARCHAR(50) DEFAULT 'No' CHECK (CP_DiscountApplied IN ('Yes', 'No')),
+CP_PaymentCounter VARCHAR(50),
+CP_TransactionMode VARCHAR(50) CHECK (CP_TransactionMode IN ('Self-Checkout', 'Cashier')) NOT NULL,
+CP_RefundEligibility VARCHAR(50) CHECK (CP_RefundEligibility IN ('Eligible', 'Not Eligible')) NOT NULL,
+CP_ShiftBatchID VARCHAR(50),
+P_ID INT,
+P_RECEIPTNO VARCHAR(50),
+constraint fk_csparid foreign key (P_ID, P_RECEIPTNO) REFERENCES Payment(P_ID, P_RECEIPTNO),
+CONSTRAINT pk_cashpayment PRIMARY KEY (CP_ID, CP_CASHDRAWERNO)
+);
+
+
+CREATE TABLE CardPayment (
+CDP_ID INT NOT NULL,
+CDP_CardType VARCHAR(50) CHECK (CDP_CardType IN ('Visa', 'Mastercard', 'Amex', 'Debit')) NOT NULL,
+CDP_LastFourDigit INT CHECK (CDP_LastFourDigit BETWEEN 0000 AND 9999) NOT NULL,
+CDP_TransactionType VARCHAR(50) CHECK (CDP_TransactionType IN ('Credit', 'Debit', 'Prepaid')) NOT NULL,
+CDP_CashBackEarned NUMBER(10,2),
+CDP_TerminalID VARCHAR(50) NOT NULL,
+CDP_AuthorizationCode VARCHAR(50) NOT NULL,
+CDP_SignatureRequired VARCHAR(10) DEFAULT 'No' CHECK (CDP_SignatureRequired IN ('Yes', 'No')),
+CDP_ForeignTransactionFee NUMBER(10,2),
+CDP_InstallmentPlan VARCHAR(50)  DEFAULT 'None' CHECK (CDP_InstallmentPlan IN ('None', '3 Months', '6 Months', '12 Months')),
+P_ID INT,
+P_RECEIPTNO VARCHAR(50),
+constraint fk_cpparid foreign key (P_ID, P_RECEIPTNO) REFERENCES Payment(P_ID, P_RECEIPTNO),
+CONSTRAINT pk_cardpayment PRIMARY KEY (CDP_ID, CDP_LASTFOURDIGIT)
+);
+
+CREATE TABLE OnlinePayment (
+OP_ID INT NOT NULL,
+OP_PaymentPlatform VARCHAR(50) NOT NULL,
+OP_DigitalAmount NUMBER(10,2) NOT NULL,
+OP_PaymentGateway VARCHAR(50),
+OP_OnlineReceipt VARCHAR(50),
+OP_PaymentStatus VARCHAR(50) DEFAULT 'Pending' CHECK (OP_PaymentStatus IN ('Successful', 'Unsuccessful', 'Pending')),
+OP_DeviceID VARCHAR(50),
+OP_IPAddress VARCHAR(45),
+OP_TransactionFee NUMBER(3,2),
+OP_SecurityToken VARCHAR(50),
+P_ID INT,
+P_RECEIPTNO VARCHAR(50),
+L_ID INT,
+L_DeviceType VARCHAR(50),
+constraint fk_opparid foreign key (P_ID, P_RECEIPTNO) REFERENCES Payment(P_ID, P_RECEIPTNO),
+CONSTRAINT pk_onlinepayment PRIMARY KEY (OP_ID, OP_ONLINERECEIPT),
+CONSTRAINT fk_opapplogin foreign key (L_ID, L_DeviceType) REFERENCES AppLogin(L_ID, L_DeviceType)
+);
+
+CREATE TABLE CustomerFeedback (
+CF_ID INT NOT NULL,
+CF_Rating INT CHECK (CF_Rating BETWEEN 1 AND 5) NOT NULL,
+CF_Comments VARCHAR(100),
+CF_Date DATE NOT NULL,
+CF_Method VARCHAR(50) CHECK (CF_Method IN ('Online', 'In-Person', 'App', 'Call Center')),
+CF_Source VARCHAR(50) CHECK (CF_Source IN ('Google Reviews', 'Social Media', 'Survey', 'In-Store')),
+CF_LittleRewards VARCHAR(50),
+CF_Type VARCHAR(50) CHECK (CF_Type IN ('Service', 'Product')),
+CF_ResolutionStatus VARCHAR(50) CHECK (CF_ResolutionStatus IN ('Pending', 'Resolved', 'Escalated')),
+CF_Suggestion VARCHAR(200),
+CONSTRAINT pk_customerfeedback PRIMARY KEY (CF_ID, CF_SUGGESTION)
+);
+
+CREATE TABLE Orders(
+O_ID INT NOT NULL,
+O_Date DATE NOT NULL,
+O_Time DATE NOT NULL,
+O_TotalAmount NUMBER(10,2) NOT NULL,
+O_PaymentMethod VARCHAR(50),
+O_Status VARCHAR(50) NOT NULL,
+O_DiscountCode VARCHAR(50),
+O_DeliveryType VARCHAR(50) NOT NULL,
+O_DeliveryAddress VARCHAR(50),
+O_Notes VARCHAR(50),
+AR_ID INT,
+AR_USERNAME VARCHAR(50),
+PE_ID INT,
+PE_PREFERREDNAME VARCHAR(50),
+LP_ID INT,
+LP_NAME VARCHAR(50),
+B_ID INT,
+B_NAME VARCHAR(50),
+GC_ID INT,
+GC_CODE VARCHAR(50),
+constraint fk_oarid foreign key (AR_ID, AR_USERNAME) REFERENCES AppRegistration(AR_ID, AR_USERNAME),
+constraint fk_opeid foreign key (PE_ID, PE_PREFERREDNAME) REFERENCES Person(PE_ID, PE_PREFERREDNAME),
+constraint fk_olpid foreign key (LP_ID, LP_NAME) REFERENCES LoyaltyProgram(LP_ID, LP_NAME),
+constraint fk_obid foreign key (B_ID, B_NAME) REFERENCES Branch(B_ID, B_NAME),
+constraint fk_ogcid foreign key (GC_ID, GC_CODE) REFERENCES GiftCards(GC_ID, GC_CODE),
+CONSTRAINT pk_orders PRIMARY KEY (O_ID, O_TOTALAMOUNT)
+);
+
+--1
+CREATE TABLE PERSON_APPREGISTRATION (
+  PE_ID INT,
+  PE_PreferredName VARCHAR(50),
+  AR_ID INT,
+  AR_Username VARCHAR(50),
+  CONSTRAINT fk_opeid1 FOREIGN KEY (PE_ID, PE_PreferredName) 
+      REFERENCES Person(PE_ID, PE_PreferredName),
+  CONSTRAINT fk_oarid1 FOREIGN KEY (AR_ID, AR_Username) 
+      REFERENCES AppRegistration(AR_ID, AR_Username)
+);
+
+--2
+CREATE TABLE PERSON_GIFTCARDS (
+  PE_ID INT,
+  PE_PreferredName VARCHAR(50),
+  GC_ID INT,
+  GC_Code VARCHAR(50),
+  CONSTRAINT fk_opeid2 FOREIGN KEY (PE_ID, PE_PreferredName) 
+      REFERENCES Person(PE_ID, PE_PreferredName),
+  CONSTRAINT fk_ogcid2 FOREIGN KEY (GC_ID, GC_Code)
+      REFERENCES GiftCards(GC_ID, GC_Code)
+);
+
+--3
+CREATE TABLE PERSON_LOYALTYPROGRAM (
+  PE_ID INT,
+  PE_PreferredName VARCHAR(50),
+  LP_ID INT,
+  LP_NAME VARCHAR(50),
+  CONSTRAINT fk_opeid3 FOREIGN KEY (PE_ID, PE_PreferredName)
+      REFERENCES Person(PE_ID, PE_PreferredName),
+  CONSTRAINT fk_olpid3 FOREIGN KEY (LP_ID, LP_Name)
+      REFERENCES LoyaltyProgram(LP_ID, LP_Name)
+);
+
+--4
+CREATE TABLE PERSON_CUSTOMERFEEDBACK (
+  PE_ID INT,
+  PE_PreferredName VARCHAR(50),
+  CF_ID INT,
+  CF_Suggestion VARCHAR(200),
+  CONSTRAINT fk_opeid4 FOREIGN KEY (PE_ID, PE_PreferredName)
+      REFERENCES Person(PE_ID, PE_PreferredName),
+  CONSTRAINT fk_ocfid4 FOREIGN KEY (CF_ID, CF_Suggestion)
+      REFERENCES CustomerFeedback(CF_ID, CF_Suggestion)
+);
+
+--5
+CREATE TABLE PERSON_BRANCH (
+  PE_ID INT,
+  PE_PreferredName VARCHAR(50),
+  B_ID INT,
+  B_Name VARCHAR(50),
+  CONSTRAINT fk_opeid5 FOREIGN KEY (PE_ID, PE_PreferredName)
+      REFERENCES Person(PE_ID, PE_PreferredName),
+  CONSTRAINT fk_obid5 FOREIGN KEY (B_ID, B_Name)
+      REFERENCES Branch(B_ID, B_Name)
+);
+
+--6
+CREATE TABLE PERSON_PAYMENT (
+  PE_ID INT,
+  PE_PreferredName VARCHAR(50),
+  P_ID INT,
+  P_RECEIPTNO VARCHAR(50),
+  CONSTRAINT fk_opeid6 FOREIGN KEY (PE_ID, PE_PreferredName)
+      REFERENCES Person(PE_ID, PE_PreferredName),
+  CONSTRAINT fk_opid6 FOREIGN KEY (P_ID, P_RECEIPTNO)
+      REFERENCES Payment(P_ID, P_RECEIPTNO)
+);
+
+--7
+CREATE TABLE PERSON_MENU (
+  PE_ID INT,
+  PE_PreferredName VARCHAR(50),
+  M_ID INT,
+  M_Name VARCHAR(50),
+  CONSTRAINT fk_opeid7 FOREIGN KEY (PE_ID, PE_PreferredName)
+      REFERENCES Person(PE_ID, PE_PreferredName),
+  CONSTRAINT fk_omid7 FOREIGN KEY (M_ID, M_Name)
+      REFERENCES Menu(M_ID, M_Name)
+);
+
+--8
+CREATE TABLE PERSON_PROMOTIONS (
+  PE_ID INT,
+  PE_PreferredName VARCHAR(50),
+  PR_ID INT,
+  PR_Name VARCHAR(50),
+  CONSTRAINT fk_opeid8 FOREIGN KEY (PE_ID, PE_PreferredName)
+      REFERENCES Person(PE_ID, PE_PreferredName),
+  CONSTRAINT fk_oprid8 FOREIGN KEY (PR_ID, PR_Name)
+      REFERENCES Promotions(PR_ID, PR_Name)
+);
+
+--9
+CREATE TABLE EMPLOYEE_EMPLOYEE (
+  E_ID INT,
+  E_FullName VARCHAR(50),
+  BA_ID INT,
+  BA_Nickname VARCHAR(50),
+  MA_ID INT,
+  MA_DisplayName VARCHAR(50),
+  CONSTRAINT fk_oeid9 FOREIGN KEY (E_ID, E_FullName) 
+      REFERENCES Employee(E_ID, E_FullName),
+  CONSTRAINT fk_obaid FOREIGN KEY (BA_ID, BA_Nickname) 
+      REFERENCES Barista(BA_ID, BA_Nickname),
+  CONSTRAINT fk_omaid9 FOREIGN KEY (MA_ID, MA_DisplayName) 
+      REFERENCES Manager(MA_ID, MA_DisplayName)
+);
+
+--10
+CREATE TABLE EMPLOYEE_INVENTORY (
+  E_ID INT,
+  E_FullName VARCHAR(50),
+  I_ID INT,
+  I_Name VARCHAR(50),
+  CONSTRAINT fk_oeid10 FOREIGN KEY (E_ID, E_FullName) 
+      REFERENCES Employee(E_ID, E_FullName),
+  CONSTRAINT fk_oiid10 FOREIGN KEY (I_ID, I_Name)
+      REFERENCES Inventory(I_ID, I_Name)
+);
+
+
+--11
+CREATE TABLE INVENTORY_ASSETS (
+  I_ID INT,
+  I_Name VARCHAR(50),
+  A_ID INT,
+  A_Name VARCHAR(50),
+  CONSTRAINT fk_oiid11 FOREIGN KEY (I_ID, I_Name)
+      REFERENCES Inventory(I_ID, I_Name),
+  CONSTRAINT fk_oaid11 FOREIGN KEY (A_ID, A_Name)
+      REFERENCES Assets(A_ID, A_Name)
+);
+
+--12
+CREATE TABLE INVENTORY_MACHINEMAINTENANCE (
+  I_ID INT,
+  I_Name VARCHAR(50),
+  MM_ID INT,
+  MM_MachineID INT,
+  CONSTRAINT fk_iiid12 FOREIGN KEY (I_ID, I_Name)
+      REFERENCES Inventory(I_ID, I_Name),
+  CONSTRAINT fk_ommid12 FOREIGN KEY (MM_ID, MM_MachineID) 
+      REFERENCES MachineMaintenance(MM_ID, MM_MachineID)
+);
+
+--13
+CREATE TABLE INVENTORY_MENU (
+  I_ID INT,
+  I_Name VARCHAR(50),
+  M_ID INT,
+  M_Name VARCHAR(50),
+  CONSTRAINT fk_iiid13 FOREIGN KEY (I_ID, I_Name)
+      REFERENCES Inventory(I_ID, I_Name),
+  CONSTRAINT fk_omid13 FOREIGN KEY (M_ID, M_Name)
+      REFERENCES Menu(M_ID, M_Name)
+);
+
+--14
+CREATE TABLE INVENTORY_ORDER (
+  I_ID INT,
+  I_Name VARCHAR(50),
+  O_ID INT,
+  O_TotalAmount DECIMAL(10,2),
+  CONSTRAINT fk_iiid14 FOREIGN KEY (I_ID, I_Name)
+      REFERENCES Inventory(I_ID, I_Name),
+  CONSTRAINT fk_ooid14 FOREIGN KEY (O_ID, O_TotalAmount)
+      REFERENCES Orders(O_ID, O_TotalAmount)
+);
+
+--15
+CREATE TABLE INVENTORY_SUPPLIER (
+  I_ID INT,
+  I_Name VARCHAR(50),
+  S_ID INT,
+  S_Name VARCHAR(50),
+  CONSTRAINT fk_iiid15 FOREIGN KEY (I_ID, I_Name)
+      REFERENCES Inventory(I_ID, I_Name),
+  CONSTRAINT fk_osid15 FOREIGN KEY (S_ID, S_Name)
+      REFERENCES Supplier(S_ID, S_Name)
+);
+
+--16
+CREATE TABLE SUPPLIER_MENU (
+  S_ID INT,
+  S_Name VARCHAR(50),
+  M_ID INT,
+  M_Name VARCHAR(50),
+  CONSTRAINT fk_osid16 FOREIGN KEY (S_ID, S_Name)
+      REFERENCES Supplier(S_ID, S_Name),
+  CONSTRAINT fk_omid16 FOREIGN KEY (M_ID, M_Name)
+      REFERENCES Menu(M_ID, M_Name)
+);
+
+--17
+CREATE TABLE SUPPLIER_BRANCH (
+  S_ID INT,
+  S_Name VARCHAR(50),
+  B_ID INT,
+  B_Name VARCHAR(50),
+  CONSTRAINT fk_osid17 FOREIGN KEY (S_ID, S_Name)
+      REFERENCES Supplier(S_ID, S_Name),
+  CONSTRAINT fk_obid17 FOREIGN KEY (B_ID, B_Name)
+      REFERENCES Branch(B_ID, B_Name)
+);
+
+--18
+CREATE TABLE SUPPLIER_ORDER (
+  S_ID INT,
+  S_Name VARCHAR(50),
+  O_ID INT,
+  O_TotalAmount DECIMAL(10,2),
+  CONSTRAINT fk_osid18 FOREIGN KEY (S_ID, S_Name)
+      REFERENCES Supplier(S_ID, S_Name),
+  CONSTRAINT fk_ooid18 FOREIGN KEY (O_ID, O_TotalAmount)
+      REFERENCES Orders(O_ID, O_TotalAmount)
+);
+
+--19
+CREATE TABLE BRANCH_CUSTOMERFEEDBACK (
+  B_ID INT,
+  B_Name VARCHAR(50),
+  CF_ID INT,
+  CF_Suggestion VARCHAR(200),
+  CONSTRAINT fk_obid19 FOREIGN KEY (B_ID, B_Name) 
+      REFERENCES Branch(B_ID, B_Name),
+  CONSTRAINT fk_ocfid19 FOREIGN KEY (CF_ID, CF_Suggestion)
+      REFERENCES CustomerFeedback(CF_ID, CF_Suggestion)
+);
+
+--20
+CREATE TABLE BRANCH_ASSETS (
+  B_ID INT,
+  B_Name VARCHAR(50),
+  A_ID INT,
+  A_Name VARCHAR(50),
+  CONSTRAINT fk_obid20 FOREIGN KEY (B_ID, B_Name)
+      REFERENCES Branch(B_ID, B_Name),
+  CONSTRAINT fk_oaid20 FOREIGN KEY (A_ID, A_Name) 
+      REFERENCES Assets(A_ID, A_Name)
+);
+
+--21
+CREATE TABLE BRANCH_PROMOTIONS (
+  B_ID INT,
+  B_Name VARCHAR(50),
+  PR_ID INT,
+  PR_Name VARCHAR(50),
+  CONSTRAINT fk_obid21 FOREIGN KEY (B_ID, B_Name)
+      REFERENCES Branch(B_ID, B_Name),
+  CONSTRAINT fk_oprid21 FOREIGN KEY (PR_ID, PR_Name)
+      REFERENCES Promotions(PR_ID, PR_Name)
+);
+
+--22
+CREATE TABLE BRANCH_EMPLOYEEPERFORMANCE (
+  B_ID INT,
+  B_Name VARCHAR(50),
+  EP_ID INT,
+  EP_Rating NUMBER(2,1),
+  CONSTRAINT fk_obid22 FOREIGN KEY (B_ID, B_Name) 
+      REFERENCES Branch(B_ID, B_Name),
+  CONSTRAINT fk_oeid22 FOREIGN KEY (EP_ID, EP_Rating)
+      REFERENCES EmployeePerformance(EP_ID, EP_Rating)
+);
+
+
+--23
+CREATE TABLE BRANCH_TRAININGPROGRAMS (
+  B_ID INT,
+  B_Name VARCHAR(50),
+  TP_ID INT,
+  TP_NAME VARCHAR(50),
+  CONSTRAINT fk_obid23 FOREIGN KEY (B_ID, B_Name)
+      REFERENCES Branch(B_ID, B_Name),
+  CONSTRAINT fk_otpid23 FOREIGN KEY (TP_ID, TP_NAME)
+      REFERENCES TrainingPrograms(TP_ID, TP_NAME)
+);
+
+--24
+CREATE TABLE ASSETS_MACHINEMAINTENANCE (
+  A_ID INT,
+  A_Name VARCHAR(50),
+  MM_ID INT,
+  MM_MachineID INT,
+  CONSTRAINT fk_oaid24 FOREIGN KEY (A_ID, A_Name)
+      REFERENCES Assets(A_ID, A_Name),
+  CONSTRAINT fk_ommid24 FOREIGN KEY (MM_ID, MM_MachineID)
+      REFERENCES MachineMaintenance(MM_ID, MM_MachineID)
+);
+
+--25
+CREATE TABLE LOYALTYPROGRAM_MENU (
+  LP_ID INT,
+  LP_Name VARCHAR(50),
+  M_ID INT,
+  M_Name VARCHAR(50),
+  CONSTRAINT fk_olpid25 FOREIGN KEY (LP_ID, LP_Name) 
+      REFERENCES LoyaltyProgram(LP_ID, LP_Name),
+  CONSTRAINT fk_omid25 FOREIGN KEY (M_ID, M_Name)
+      REFERENCES Menu(M_ID, M_Name)
+);
+
+--26
+CREATE TABLE LP_PROMOTIONS (
+  LP_ID INT,
+  LP_Name VARCHAR(50),
+  PR_ID INT,
+  PR_Name VARCHAR(50),
+  CONSTRAINT fk_olpid26 FOREIGN KEY (LP_ID, LP_Name)
+      REFERENCES LoyaltyProgram(LP_ID, LP_Name),
+  CONSTRAINT fk_oprid26 FOREIGN KEY (PR_ID, PR_Name)
+      REFERENCES Promotions(PR_ID, PR_Name)
+);
+
+--27
+CREATE TABLE LP_CUSTOMERFEEDBACK (
+  LP_ID INT,
+  LP_Name VARCHAR(100),
+  CF_ID INT,
+  CF_Suggestion VARCHAR(200),
+  CONSTRAINT fk_olpid27 FOREIGN KEY (LP_ID, LP_Name)
+      REFERENCES LoyaltyProgram(LP_ID, LP_Name),
+  CONSTRAINT fk_ocfid27 FOREIGN KEY (CF_ID, CF_Suggestion) 
+      REFERENCES CustomerFeedback(CF_ID, CF_Suggestion)
+);
+
+--28
+CREATE TABLE LOYALTYPROGRAM_PERSON (
+  LP_ID INT,
+  LP_Name VARCHAR(50),
+  PE_ID INT,
+  PE_PREFERREDNAME VARCHAR(50),
+  CONSTRAINT fk_olpid28 FOREIGN KEY (LP_ID, LP_Name)
+      REFERENCES LoyaltyProgram(LP_ID, LP_Name),
+  CONSTRAINT fk_opeid28 FOREIGN KEY (PE_ID, PE_PREFERREDNAME)
+      REFERENCES Person(PE_ID, PE_PREFERREDNAME)
+);
+
+--29
+CREATE TABLE LP_APPREGISTRATION (
+  LP_ID INT,
+  LP_Name VARCHAR(50),
+  AR_ID INT,
+  AR_Username VARCHAR(50),
+  CONSTRAINT fk_olpid29 FOREIGN KEY (LP_ID, LP_Name)
+      REFERENCES LoyaltyProgram(LP_ID, LP_Name),
+  CONSTRAINT fk_oaid29 FOREIGN KEY (AR_ID, AR_Username)
+      REFERENCES AppRegistration(AR_ID, AR_Username)
+);
+
+--30
+CREATE TABLE APPLOGIN_CF(
+  L_ID INT,
+  L_DeviceType VARCHAR(50),
+  CF_ID INT,
+  CF_Suggestion VARCHAR(200),
+  CONSTRAINT fk_olid30 FOREIGN KEY (L_ID, L_DeviceType)
+      REFERENCES AppLogin(L_ID, L_DeviceType),
+  CONSTRAINT fk_ocfid30 FOREIGN KEY (CF_ID, CF_Suggestion)
+      REFERENCES CustomerFeedback(CF_ID, CF_Suggestion)
+);
+
+--31
+CREATE TABLE APPLOGIN_APPREGISTRATION (
+  L_ID INT,
+  L_DeviceType VARCHAR(50),
+  AR_ID INT,
+  AR_Username VARCHAR(50),
+  CONSTRAINT fk_olid31 FOREIGN KEY (L_ID, L_DeviceType)
+      REFERENCES AppLogin(L_ID, L_DeviceType),
+  CONSTRAINT fk_oaid31 FOREIGN KEY (AR_ID, AR_Username)
+      REFERENCES AppRegistration(AR_ID, AR_Username)
+);
+
+--32
+CREATE TABLE APPREGISTRATION_GIFTCARDS (
+  AR_ID INT,
+  AR_Username VARCHAR(50),
+  GC_ID INT,
+  GC_Code VARCHAR(50),
+  CONSTRAINT fk_oaid32 FOREIGN KEY (AR_ID, AR_Username)
+      REFERENCES AppRegistration(AR_ID, AR_Username),
+  CONSTRAINT fk_ogcid32 FOREIGN KEY (GC_ID, GC_Code)
+      REFERENCES GiftCards(GC_ID, GC_Code)
+);
+
+--33
+CREATE TABLE APPREGISTRATION_PROMOTIONS (
+  AR_ID INT,
+  AR_Username VARCHAR(50),
+  PR_ID INT,
+  PR_Name VARCHAR(50),
+  CONSTRAINT fk_oaid33 FOREIGN KEY (AR_ID, AR_Username)
+      REFERENCES AppRegistration(AR_ID, AR_Username),
+  CONSTRAINT fk_oprid33 FOREIGN KEY (PR_ID, PR_Name) 
+      REFERENCES Promotions(PR_ID, PR_Name)
+);
+
+--34
+CREATE TABLE APPREGISTRATION_MENU (
+  AR_ID INT,
+  AR_Username VARCHAR(50),
+  M_ID INT,
+  M_Name VARCHAR(50),
+  CONSTRAINT fk_arid34 FOREIGN KEY (AR_ID, AR_Username)
+      REFERENCES AppRegistration(AR_ID, AR_Username),
+  CONSTRAINT fk_mid34 FOREIGN KEY (M_ID, M_Name)
+      REFERENCES Menu(M_ID, M_Name)
+);
+
+--35
+CREATE TABLE AR_CUSTOMERFEEDBACK (
+  AR_ID INT,
+  AR_Username VARCHAR(50),
+  CF_ID INT,
+  CF_Suggestion VARCHAR(200),
+  CONSTRAINT fk_arid35 FOREIGN KEY (AR_ID, AR_Username)
+      REFERENCES AppRegistration(AR_ID, AR_Username),
+  CONSTRAINT fk_cfid35 FOREIGN KEY (CF_ID, CF_Suggestion)
+      REFERENCES CustomerFeedback(CF_ID, CF_Suggestion)
+);
+
+--36
+CREATE TABLE PROMOTIONS_CUSTOMERFEEDBACK (
+  PR_ID INT,
+  PR_Name VARCHAR(50),
+  CF_ID INT,
+  CF_Suggestion VARCHAR(200),
+  CONSTRAINT fk_prid36 FOREIGN KEY (PR_ID, PR_Name)
+      REFERENCES Promotions(PR_ID, PR_Name),
+  CONSTRAINT fk_cfid36 FOREIGN KEY (CF_ID, CF_Suggestion) 
+      REFERENCES CustomerFeedback(CF_ID, CF_Suggestion)
+);
+
+--37
+CREATE TABLE PROMOTIONS_PAYMENT (
+  PR_ID INT,
+  PR_Name VARCHAR(50),
+  P_ID INT,
+  P_ReceiptNo VARCHAR(50),
+  CONSTRAINT fk_prid37 FOREIGN KEY (PR_ID, PR_Name)
+      REFERENCES Promotions(PR_ID, PR_Name),
+  CONSTRAINT fk_pid37 FOREIGN KEY (P_ID, P_ReceiptNo)
+      REFERENCES Payment(P_ID, P_ReceiptNo)
+);
+
+--38
+CREATE TABLE PROMOTION_ORDER (
+  PR_ID INT,
+  PR_Name VARCHAR(50),
+  O_ID INT,
+  O_TotalAmount NUMBER(10,2),
+  CONSTRAINT fk_prid38 FOREIGN KEY (PR_ID, PR_Name) 
+      REFERENCES Promotions(PR_ID, PR_Name),
+  CONSTRAINT fk_oid38 FOREIGN KEY (O_ID, O_TotalAmount) 
+      REFERENCES Orders(O_ID, O_TotalAmount)
+);
+
+--39
+CREATE TABLE PROMOTIONS_MENU (
+  PR_ID INT,
+  PR_Name VARCHAR(50),
+  M_ID INT,
+  M_Name VARCHAR(50),
+  CONSTRAINT fk_prid39 FOREIGN KEY (PR_ID, PR_Name)
+      REFERENCES Promotions(PR_ID, PR_Name),
+  CONSTRAINT fk_mid39 FOREIGN KEY (M_ID, M_Name) 
+      REFERENCES Menu(M_ID, M_Name)
+);
+
+--40
+CREATE TABLE MENU_ORDER (
+  M_ID INT,
+  M_Name VARCHAR(50),
+  O_ID INT,
+  O_TotalAmount NUMBER(10,2),
+  CONSTRAINT fk_mid40 FOREIGN KEY (M_ID, M_Name)
+      REFERENCES Menu(M_ID, M_Name),
+  CONSTRAINT fk_oid40 FOREIGN KEY (O_ID, O_TotalAmount)
+      REFERENCES Orders(O_ID, O_TotalAmount)
+);
+
+--41
+CREATE TABLE MENU_PAYMENT (
+  M_ID INT,
+  M_Name VARCHAR(50),
+  P_ID INT,
+  P_ReceiptNo VARCHAR(50),
+  CONSTRAINT fk_mid41 FOREIGN KEY (M_ID, M_Name)
+      REFERENCES Menu(M_ID, M_Name),
+  CONSTRAINT fk_pid41 FOREIGN KEY (P_ID, P_ReceiptNo)
+      REFERENCES Payment(P_ID, P_ReceiptNo)
+);
+
+--42
+CREATE TABLE ORDER_PAYMENT (
+  O_ID INT,
+  O_TotalAmount NUMBER(10,2),
+  P_ID INT,
+  P_ReceiptNo VARCHAR(50),
+  CONSTRAINT fk_oid42 FOREIGN KEY (O_ID, O_TotalAmount) 
+      REFERENCES Orders(O_ID, O_TotalAmount),
+  CONSTRAINT fk_pid42 FOREIGN KEY (P_ID, P_ReceiptNo)
+      REFERENCES Payment(P_ID, P_ReceiptNo)
+);
+
+--43
+CREATE TABLE ORDER_CUSTOMERFEEDBACK (
+  O_ID INT,
+  O_TotalAmount NUMBER(10,2),
+  CF_ID INT,
+  CF_Suggestion VARCHAR(200),
+  CONSTRAINT fk_oid43 FOREIGN KEY (O_ID, O_TotalAmount)
+      REFERENCES Orders(O_ID, O_TotalAmount),
+  CONSTRAINT fk_cfid43 FOREIGN KEY (CF_ID, CF_Suggestion)
+      REFERENCES CustomerFeedback(CF_ID, CF_Suggestion)
+);
+
+--44
+CREATE TABLE ORDER_GIFTCARDS (
+  O_ID INT,
+  O_TotalAmount NUMBER(10,2),
+  GC_ID INT,
+  GC_Code VARCHAR(50),
+  CONSTRAINT fk_oid44 FOREIGN KEY (O_ID, O_TotalAmount)
+      REFERENCES Orders(O_ID, O_TotalAmount),
+  CONSTRAINT fk_gcid44 FOREIGN KEY (GC_ID, GC_Code)
+      REFERENCES GiftCards(GC_ID, GC_Code)
+);
+
+--45
+CREATE TABLE PAYMENT_CUSTOMERFEEDBACK (
+  P_ID INT,
+  P_ReceiptNo VARCHAR(50),
+  CF_ID INT,
+  CF_Suggestion VARCHAR(200),
+  CONSTRAINT fk_pid45 FOREIGN KEY (P_ID, P_ReceiptNo)
+      REFERENCES Payment(P_ID, P_ReceiptNo),
+  CONSTRAINT fk_cfid45 FOREIGN KEY (CF_ID, CF_Suggestion)
+      REFERENCES CustomerFeedback(CF_ID, CF_Suggestion)
+);
+
+--46
+CREATE TABLE PAYMENT_GIFTCARDS (
+  P_ID INT,
+  P_ReceiptNo VARCHAR(50),
+  GC_ID INT,
+  GC_Code VARCHAR(50),
+  CONSTRAINT fk_pid46 FOREIGN KEY (P_ID, P_ReceiptNo) 
+      REFERENCES Payment(P_ID, P_ReceiptNo),
+  CONSTRAINT fk_gcid46 FOREIGN KEY (GC_ID, GC_Code) 
+      REFERENCES GiftCards(GC_ID, GC_Code)
+);
+
